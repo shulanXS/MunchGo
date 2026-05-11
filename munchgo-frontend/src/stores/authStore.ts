@@ -13,6 +13,7 @@ interface AuthState {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
+  updateToken: (accessToken: string, refreshToken: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -74,6 +75,10 @@ export const useAuthStore = create<AuthState>()(
         if (currentUser) {
           set({ user: { ...currentUser, ...userData } });
         }
+      },
+
+      updateToken: (accessToken: string, refreshToken: string) => {
+        set({ accessToken, refreshToken, isAuthenticated: true });
       },
     }),
     {

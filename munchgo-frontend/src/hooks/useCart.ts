@@ -5,6 +5,7 @@ import { cartApi } from '@/api/cart';
 import { CartItemRequest } from '@/types/cart';
 import { useAuth } from './useAuth';
 import { useToast } from './useToast';
+import { Cart } from '@/types/cart';
 
 export function useCart() {
   const { isAuthenticated } = useAuth();
@@ -18,11 +19,15 @@ export function useCart() {
     enabled: isAuthenticated,
   });
 
+  const syncCart = useCallback((newCart: Cart | null) => {
+    setCart(newCart);
+    queryClient.setQueryData(['cart'], newCart);
+  }, [setCart, queryClient]);
+
   const addItemMutation = useMutation({
     mutationFn: (data: CartItemRequest) => cartApi.addItem(data),
     onSuccess: (newCart) => {
-      setCart(newCart);
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      syncCart(newCart);
       toastSuccess('已添加到购物车');
     },
     onError: () => {
@@ -31,28 +36,28 @@ export function useCart() {
   });
 
   const updateItemMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: CartItemRequest }) =>
-      cartApi.updateItem(id, data),
+    mutationFn: ({ id, quantity }: { id: number; quantity: number }) =>
+      cartApi.updateItem(id, { quantity }),
     onSuccess: (newCart) => {
-      setCart(newCart);
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      syncCart(newCart);
     },
   });
 
   const removeItemMutation = useMutation({
     mutationFn: (id: number) => cartApi.removeItem(id),
     onSuccess: (newCart) => {
-      setCart(newCart);
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      syncCart(newCart);
     },
   });
 
   const clearCartMutation = useMutation({
     mutationFn: () => cartApi.clearCart(),
     onSuccess: () => {
-      setCart(null);
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      syncCart(null);
       toastSuccess('购物车已清空');
+    },
+    onError: () => {
+      toastError('清空失败，请重试');
     },
   });
 
@@ -68,25 +73,35 @@ export function useCart() {
   );
 
   const updateItem = useCallback(
-    (itemId: number, quantity: number, menuItemId: number) => {
-      updateItemMutation.mutate({ id: itemId, data: { menuItemId, quantity } });
+    (cartItemId: number, quantity: number) => {
+      if (quantity <= 0) {
+        removeItemMutation.mutate(cartItemId);
+        return;
+      }
+      updateItemMutation.mutate({ id: cartItemId, quantity });
     },
-    [updateItemMutation]
+    [updateItemMutation, removeItemMutation]
   );
 
   const removeItem = useCallback(
-    (itemId: number, menuItemId?: number) => {
-      const id = itemId || menuItemId;
-      if (id) removeItemMutation.mutate(id);
+    (cartItemId: number) => {
+      if (cartItemId) removeItemMutation.mutate(cartItemId);
     },
     [removeItemMutation]
   );
 
-  const clearCart = useCallback(() => {
-    clearCartMutation.mutate();
-  }, [clearCartMutation]);
+  const clearCart = useCallback(
+    async () => {
+      try {
+        await clearCartMutation.mutateAsync();
+      } catch {
+        // error handled by onError
+      }
+    },
+    [clearCartMutation]
+  );
 
-  const displayCart = serverCart || cart;
+  const displayCart = serverCart ?? cart;
 
   return {
     cart: displayCart,

@@ -80,7 +80,7 @@ export default function RiderDashboardPage() {
         <StatCard label="今日配送" value={stats.loading ? '—' : String(stats.todayCount)} icon={<Package className="h-5 w-5 text-blue-600" />} color="bg-blue-50" loading={stats.loading} />
         <StatCard label="待取货" value={stats.loading ? '—' : String(stats.pendingCount)} icon={<Clock className="h-5 w-5 text-orange-600" />} color="bg-orange-50" loading={stats.loading} />
         <StatCard label="累计完成" value={stats.loading ? '—' : String(stats.completedCount)} icon={<CheckCircle2 className="h-5 w-5 text-green-600" />} color="bg-green-50" loading={stats.loading} />
-        <StatCard label="配送收入" value={stats.loading ? '—' : `¥${formatPrice(stats.totalEarnings)}`} icon={<DollarSign className="h-5 w-5 text-purple-600" />} color="bg-purple-50" loading={stats.loading} />
+        <StatCard label="配送收入" value={stats.loading ? '—' : formatPrice(stats.totalEarnings)} icon={<DollarSign className="h-5 w-5 text-purple-600" />} color="bg-purple-50" loading={stats.loading} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

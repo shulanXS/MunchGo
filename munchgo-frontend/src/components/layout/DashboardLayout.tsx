@@ -11,14 +11,10 @@ import {
   ChevronLeft,
   Menu,
   LogOut,
-  Bell,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { ToastContainer } from '@/components/ui/Toast';
-import { Badge } from '@/components/ui/Badge';
-import { useQuery } from '@tanstack/react-query';
-import { notificationApi } from '@/api/notification';
 
 interface NavItem {
   label: string;
@@ -44,7 +40,7 @@ function Sidebar({ items, isCollapsed, onToggle }: SidebarProps) {
     >
       <div className="flex h-16 items-center justify-between border-b px-4">
         {!isCollapsed && (
-          <Link to="/" className="text-xl font-bold text-primary">MunchGo</Link>
+          <span className="text-xl font-bold text-primary">MunchGo</span>
         )}
         <button onClick={onToggle} className="p-1 hover:bg-muted rounded">
           {isCollapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
@@ -63,7 +59,7 @@ function Sidebar({ items, isCollapsed, onToggle }: SidebarProps) {
               )}
               title={isCollapsed ? item.label : undefined}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <item.icon className="h-5 w-5 shrink-0" />
               {!isCollapsed && <span>{item.label}</span>}
             </Link>
           );
@@ -88,7 +84,7 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
     { label: '餐厅管理', icon: UtensilsCrossed, href: `/${type}/restaurant` },
     { label: '菜单管理', icon: Utensils, href: `/${type}/menu` },
     { label: '订单管理', icon: ShoppingBag, href: `/${type}/orders` },
-    { label: '数据分析', icon: BarChart3, href: `/${type}/stats` },
+    { label: '数据分析', icon: BarChart3, href: `/${type}/analytics` },
   ];
 
   const adminNav: NavItem[] = [
@@ -96,7 +92,7 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
     { label: '用户管理', icon: Users, href: `/${type}/users` },
     { label: '餐厅管理', icon: UtensilsCrossed, href: `/${type}/restaurants` },
     { label: '订单管理', icon: ShoppingBag, href: `/${type}/orders` },
-    { label: '数据分析', icon: BarChart3, href: `/${type}/stats` },
+    { label: '数据分析', icon: BarChart3, href: `/${type}/analytics` },
   ];
 
   const riderNav: NavItem[] = [
@@ -106,12 +102,6 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
   ];
 
   const navItems = type === 'merchant' ? merchantNav : type === 'admin' ? adminNav : riderNav;
-
-  const { data: unreadCount } = useQuery({
-    queryKey: ['unreadCount'],
-    queryFn: () => notificationApi.getUnreadCount(),
-    refetchInterval: 30000,
-  });
 
   const handleLogout = () => {
     logout();
@@ -136,14 +126,6 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
             <p className="text-sm text-muted-foreground">Welcome, {user?.username}</p>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/notifications" className="relative p-2 text-muted-foreground hover:text-foreground">
-              <Bell className="h-5 w-5" />
-              {unreadCount ? (
-                <Badge className="absolute -top-0.5 -right-0.5 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Badge>
-              ) : null}
-            </Link>
             <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
               退出

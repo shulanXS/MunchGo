@@ -10,6 +10,18 @@ const client = axios.create({
   },
 });
 
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach(cb => cb(token));
+  refreshSubscribers = [];
+}
+
 client.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
@@ -24,13 +36,48 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => response,
   async (error: AxiosError<ApiResponse>) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config as any;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
       const authStore = useAuthStore.getState();
-      if (authStore.accessToken) {
+
+      if (!authStore.accessToken || !authStore.refreshToken) {
         authStore.logout();
-        window.location.href = '/login';
+        window.location.replace('/login');
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(client(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const response = await axios.post('/api/auth/refresh', {
+          refreshToken: authStore.refreshToken,
+        });
+        const data = (response.data as ApiResponse<any>).data;
+        authStore.updateToken(data.accessToken, data.refreshToken);
+        onRefreshed(data.accessToken);
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        isRefreshing = false;
+        return client(originalRequest);
+      } catch (refreshError) {
+        isRefreshing = false;
+        refreshSubscribers = [];
+        authStore.logout();
+        window.location.replace('/login');
+        return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );

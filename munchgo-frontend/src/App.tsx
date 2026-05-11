@@ -56,6 +56,7 @@ const MerchantDashboardPage = lazy(() => import('@/pages/merchant/MerchantDashbo
 const MerchantOrderManagementPage = lazy(() => import('@/pages/merchant/OrderManagement'));
 const MerchantRestaurantManagementPage = lazy(() => import('@/pages/merchant/RestaurantManagement'));
 const MerchantMenuManagementPage = lazy(() => import('@/pages/merchant/MenuManagement'));
+const MerchantAnalyticsPage = lazy(() => import('@/pages/merchant/Analytics'));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminUsersManagementPage = lazy(() => import('@/pages/admin/UsersManagement'));
 const AdminRestaurantManagementPage = lazy(() => import('@/pages/admin/RestaurantManagement'));
@@ -100,6 +101,7 @@ function App() {
           <Route path="/merchant/orders" element={<ProtectedRoute allowedRoles={['MERCHANT']}><MerchantOrderManagementPage /></ProtectedRoute>} />
           <Route path="/merchant/restaurant" element={<ProtectedRoute allowedRoles={['MERCHANT']}><MerchantRestaurantManagementPage /></ProtectedRoute>} />
           <Route path="/merchant/menu" element={<ProtectedRoute allowedRoles={['MERCHANT']}><MerchantMenuManagementPage /></ProtectedRoute>} />
+          <Route path="/merchant/analytics" element={<ProtectedRoute allowedRoles={['MERCHANT']}><MerchantAnalyticsPage /></ProtectedRoute>} />
 
           {/* Admin routes — strictly ADMIN only */}
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboardPage /></ProtectedRoute>} />

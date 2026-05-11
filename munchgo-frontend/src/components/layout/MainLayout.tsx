@@ -1,14 +1,12 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Search, Heart, Bell, LogOut } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Heart, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { ToastContainer } from '@/components/ui/Toast';
-import { useQuery } from '@tanstack/react-query';
-import { notificationApi } from '@/api/notification';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuth();
@@ -20,13 +18,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   const isCustomer = user?.role === 'CUSTOMER' || !user?.role;
   const showCustomerNav = isCustomer;
-
-  const { data: unreadCount } = useQuery({
-    queryKey: ['unreadCount'],
-    queryFn: () => notificationApi.getUnreadCount(),
-    enabled: isAuthenticated,
-    refetchInterval: 30000,
-  });
 
   const handleLogout = () => {
     logout();
@@ -68,15 +59,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                   <>
                     <Link to="/favorites" className="hidden md:flex items-center gap-1 text-muted-foreground hover:text-foreground">
                       <Heart className="h-5 w-5" />
-                    </Link>
-
-                    <Link to="/notifications" className="relative p-2 text-muted-foreground hover:text-foreground">
-                      <Bell className="h-5 w-5" />
-                      {unreadCount ? (
-                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      ) : null}
                     </Link>
 
                     <Link to="/cart" className="relative p-2 text-muted-foreground hover:text-foreground">

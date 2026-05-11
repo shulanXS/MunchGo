@@ -65,7 +65,7 @@ export default function CartPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <h3 className="font-medium truncate">{name}</h3>
-                        <button onClick={() => removeItem(item.id || item.menuItemId, item.menuItemId)} className="p-1 text-muted-foreground hover:text-destructive">
+                        <button onClick={() => removeItem(item.id)} className="p-1 text-muted-foreground hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -73,14 +73,14 @@ export default function CartPage() {
                       <div className="mt-2 flex items-center justify-between">
                         <div className="flex items-center gap-2 border rounded-lg">
                           <button
-                            onClick={() => updateItem(item.id, item.quantity - 1, item.menuItemId)}
+                            onClick={() => updateItem(item.id, item.quantity - 1)}
                             className="p-1.5 hover:bg-muted rounded-l-lg"
                           >
                             <Minus className="h-3 w-3" />
                           </button>
                           <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                           <button
-                            onClick={() => updateItem(item.id, item.quantity + 1, item.menuItemId)}
+                            onClick={() => updateItem(item.id, item.quantity + 1)}
                             className="p-1.5 hover:bg-muted rounded-r-lg"
                           >
                             <Plus className="h-3 w-3" />
