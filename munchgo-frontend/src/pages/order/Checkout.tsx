@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/Button';
@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useCart } from '@/hooks/useCart';
 import { useCreateOrder } from '@/hooks/useOrder';
 import { addressApi } from '@/api/address';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { formatPrice } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,6 +27,15 @@ export default function CheckoutPage() {
     queryFn: () => addressApi.getAddresses(),
     enabled: isAuthenticated,
   });
+
+  useEffect(() => {
+    if (addresses && addresses.length > 0 && selectedAddressId === null) {
+      const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+      if (defaultAddr?.id) {
+        setSelectedAddressId(defaultAddr.id);
+      }
+    }
+  }, [addresses, selectedAddressId]);
 
   const createOrder = useCreateOrder();
 

@@ -33,6 +33,8 @@ jwt:
   access-token-expiration: 1800000
   refresh-token-expiration: 604800000
 
+# NOTE: backend runs on port 8081 by default
+
 springdoc:
   api-docs:
     path: /api-docs
