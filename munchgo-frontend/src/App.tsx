@@ -64,7 +64,6 @@ const AdminAnalyticsPage = lazy(() => import('@/pages/admin/Analytics'));
 const RiderDashboardPage = lazy(() => import('@/pages/rider/RiderDashboard'));
 const RiderOrderManagementPage = lazy(() => import('@/pages/rider/OrderManagement'));
 const RiderOrderPoolPage = lazy(() => import('@/pages/rider/OrderPool'));
-const RiderDeliveryHistoryPage = lazy(() => import('@/pages/rider/DeliveryHistory'));
 
 function LoadingFallback() {
   return <PageLoading />;
@@ -113,7 +112,6 @@ function App() {
           <Route path="/rider" element={<ProtectedRoute allowedRoles={['RIDER']}><RiderDashboardPage /></ProtectedRoute>} />
           <Route path="/rider/orders" element={<ProtectedRoute allowedRoles={['RIDER']}><RiderOrderManagementPage /></ProtectedRoute>} />
           <Route path="/rider/pool" element={<ProtectedRoute allowedRoles={['RIDER']}><RiderOrderPoolPage /></ProtectedRoute>} />
-          <Route path="/rider/history" element={<ProtectedRoute allowedRoles={['RIDER']}><RiderDeliveryHistoryPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>

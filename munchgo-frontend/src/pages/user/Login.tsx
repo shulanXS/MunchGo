@@ -30,9 +30,17 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login({ username, password });
-      const role = useAuthStore.getState().user?.role;
+      const state = useAuthStore.getState();
+      console.log('[Login] store state after login:', {
+        isAuthenticated: state.isAuthenticated,
+        user: state.user,
+        role: state.user?.role,
+      });
+      const role = state.user?.role;
+      console.log('[Login] redirecting to:', getRedirectPath(role));
       navigate(getRedirectPath(role));
     } catch (err: any) {
+      console.error('[Login] error:', err);
       error(err?.response?.data?.message || err?.message || '登录失败');
     } finally {
       setLoading(false);
@@ -75,15 +83,6 @@ export default function LoginPage() {
               立即注册
             </Link>
           </p>
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-xs text-center text-muted-foreground">
-              商家、骑手、管理员请使用专门账号登录
-            </p>
-            <div className="mt-2 flex justify-center gap-4 text-xs text-muted-foreground">
-              <span>商家后台 <Link to="/register" className="text-primary hover:underline">注册</Link></span>
-              <span>骑手后台 <Link to="/register" className="text-primary hover:underline">注册</Link></span>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

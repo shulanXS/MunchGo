@@ -15,7 +15,6 @@ const TABS = [
   { value: '', label: '全部' },
   { value: OrderStatus.READY, label: '待取货' },
   { value: OrderStatus.DELIVERING, label: '配送中' },
-  { value: OrderStatus.COMPLETED, label: '已完成' },
 ];
 
 export default function RiderOrderManagementPage() {

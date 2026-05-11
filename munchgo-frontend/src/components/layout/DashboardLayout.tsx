@@ -12,7 +12,6 @@ import {
   Menu,
   LogOut,
   Bell,
-  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -104,7 +103,6 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
     { label: '工作台', icon: LayoutDashboard, href: `/${type}` },
     { label: '接单池', icon: ShoppingBag, href: `/${type}/pool` },
     { label: '我的配送', icon: ShoppingCart, href: `/${type}/orders` },
-    { label: '配送历史', icon: History, href: `/${type}/history` },
   ];
 
   const navItems = type === 'merchant' ? merchantNav : type === 'admin' ? adminNav : riderNav;
