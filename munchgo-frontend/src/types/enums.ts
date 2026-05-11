@@ -1,0 +1,22 @@
+export enum UserRole {
+  CUSTOMER = 'CUSTOMER',
+  MERCHANT = 'MERCHANT',
+  RIDER = 'RIDER',
+  ADMIN = 'ADMIN',
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  DELIVERING = 'DELIVERING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum RestaurantStatus {
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED',
+  SUSPENDED = 'SUSPENDED',
+}

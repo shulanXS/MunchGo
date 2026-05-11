@@ -1,0 +1,48 @@
+# ============================================================
+# MunchGo Docker 配置
+# ============================================================
+#
+# 启动方式：
+#   完整生产部署（需构建镜像）：
+#      docker-compose --profile full up -d
+#
+# 端口映射：
+#   - 后端: localhost:8080  (仅生产模式)
+#   - 前端: localhost:5173   (仅生产模式)
+# ============================================================
+
+services:
+  # MunchGo 后端（连接已运行的 munchgo-postgres 容器）
+  backend:
+    build:
+      context: ./munchgo-backend
+      dockerfile: Dockerfile
+    image: munchgo-backend:latest
+    profiles:
+      - full
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://munchgo-postgres:5432/munchgo
+      SPRING_DATASOURCE_USERNAME: munchgo
+      SPRING_DATASOURCE_PASSWORD: munchgo123
+      JWT_SECRET: munchgo-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long
+      SERVER_PORT: "8080"
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./munchgo-frontend
+      dockerfile: Dockerfile
+    image: munchgo-frontend:latest
+    profiles:
+      - full
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  # 持久化卷
