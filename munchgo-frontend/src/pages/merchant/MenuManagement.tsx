@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Utensils, ToggleLeft, ToggleRight } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -10,10 +10,11 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { restaurantApi } from '@/api/restaurant';
 import { menuItemApi } from '@/api/menuItem';
-import { MenuItem } from '@/types/restaurant';
-import { Category } from '@/types/menu';
+import { MenuItem, Category } from '@/types/menu';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
+import { useMerchantStore } from '@/stores/merchantStore';
+import { useNavigate } from 'react-router-dom';
 
 const emptyItemForm = {
   name: '',
@@ -26,6 +27,8 @@ const emptyItemForm = {
 };
 
 export default function MerchantMenuManagementPage() {
+  const navigate = useNavigate();
+  const { currentRestaurantId, setCurrentRestaurant } = useMerchantStore();
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | null>(null);
   const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
@@ -40,20 +43,28 @@ export default function MerchantMenuManagementPage() {
     queryFn: () => restaurantApi.getMyRestaurants(),
   });
 
-  const { data: categories = [], isLoading: loadingCategories } = useQuery({
-    queryKey: ['merchant-categories', selectedRestaurantId],
-    queryFn: () => restaurantApi.getCategories(selectedRestaurantId!),
-    enabled: !!selectedRestaurantId,
+  const activeRestaurantId = selectedRestaurantId || currentRestaurantId;
+
+  useEffect(() => {
+    if (restaurants.length > 0 && !currentRestaurantId && !selectedRestaurantId) {
+      setCurrentRestaurant(restaurants[0].id);
+    }
+  }, [restaurants, currentRestaurantId, selectedRestaurantId, setCurrentRestaurant]);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['merchant-categories', activeRestaurantId],
+    queryFn: () => restaurantApi.getCategories(activeRestaurantId!),
+    enabled: !!activeRestaurantId,
   });
 
   const { data: menuItems = [], isLoading: loadingItems } = useQuery({
-    queryKey: ['merchant-menu', selectedRestaurantId],
-    queryFn: () => restaurantApi.getMenu(selectedRestaurantId!),
-    enabled: !!selectedRestaurantId,
+    queryKey: ['merchant-menu', activeRestaurantId],
+    queryFn: () => restaurantApi.getMenu(activeRestaurantId!),
+    enabled: !!activeRestaurantId,
   });
 
   const createItemMutation = useMutation({
-    mutationFn: (data: typeof emptyItemForm) => menuItemApi.createMenuItem(selectedRestaurantId!, {
+    mutationFn: (data: typeof emptyItemForm) => menuItemApi.createMenuItem(activeRestaurantId!, {
       name: data.name,
       description: data.description || undefined,
       price: Number(data.price),
@@ -106,7 +117,7 @@ export default function MerchantMenuManagementPage() {
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: (name: string) => menuItemApi.createCategory(selectedRestaurantId!, { name }),
+    mutationFn: (name: string) => menuItemApi.createCategory(activeRestaurantId!, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['merchant-categories'] });
       success('分类添加成功');
@@ -169,10 +180,10 @@ export default function MerchantMenuManagementPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold">菜单管理</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsCategoryDialogOpen(true)} disabled={!selectedRestaurantId}>
+          <Button variant="outline" size="sm" onClick={() => setIsCategoryDialogOpen(true)} disabled={!activeRestaurantId}>
             添加分类
           </Button>
-          <Button onClick={() => { setItemForm(emptyItemForm); setEditItem(null); setIsItemDialogOpen(true); }} disabled={!selectedRestaurantId}>
+          <Button onClick={() => { setItemForm(emptyItemForm); setEditItem(null); setIsItemDialogOpen(true); }} disabled={!activeRestaurantId}>
             <Plus className="h-4 w-4 mr-1" /> 添加菜品
           </Button>
         </div>
@@ -181,15 +192,18 @@ export default function MerchantMenuManagementPage() {
       {loadingRestaurants ? (
         <Skeleton className="h-10 w-64 mb-6" />
       ) : restaurants.length === 0 ? (
-        <EmptyState icon={<Utensils className="h-10 w-10" />} title="请先添加餐厅" description="在餐厅管理中添加餐厅后再来管理菜单" />
+        <EmptyState icon={<Utensils className="h-10 w-10" />} title="请先添加餐厅" description="在餐厅管理中添加餐厅后再来管理菜单" action={<Button onClick={() => navigate('/merchant/restaurant')}><Plus className="h-4 w-4 mr-1" /> 添加餐厅</Button>} />
       ) : (
         <>
           <div className="mb-6">
-            <label className="text-sm font-medium mb-1 block">选择餐厅</label>
+            <label className="text-sm font-medium mb-1 block">当前餐厅</label>
             <Select
-              value={String(selectedRestaurantId || '')}
-              onChange={(v) => setSelectedRestaurantId(Number(v))}
-              placeholder="请选择餐厅"
+              value={String(activeRestaurantId || '')}
+              onChange={(v) => {
+                const id = Number(v);
+                setSelectedRestaurantId(id);
+                setCurrentRestaurant(id);
+              }}
               className="w-64"
             >
               {restaurants.map(r => (

@@ -136,11 +136,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">配送费</span>
-                  <span>¥0.00</span>
+                  <span>{formatPrice(cart.deliveryFee ?? 0)}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t font-semibold text-lg">
                   <span>合计</span>
-                  <span className="text-primary">{formatPrice(cart.totalAmount)}</span>
+                  <span className="text-primary">{formatPrice((cart.totalAmount ?? 0) + (cart.deliveryFee ?? 0))}</span>
                 </div>
               </div>
               <Button className="w-full mt-4" size="lg" onClick={handleSubmit} disabled={!selectedAddressId || createOrder.isPending}>

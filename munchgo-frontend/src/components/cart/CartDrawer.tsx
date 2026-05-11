@@ -3,13 +3,12 @@ import { Link } from 'react-router-dom';
 import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
-import { useCartStore } from '@/stores/cartStore';
 import { useCart } from '@/hooks/useCart';
 import { useNavigate } from 'react-router-dom';
 
 export function CartDrawer() {
-  const { isDrawerOpen, closeDrawer, cart } = useCartStore();
-  const { updateItem, removeItem } = useCart();
+  const { cart: displayCart, isDrawerOpen, closeDrawer, updateItem, removeItem } = useCart();
+  const cart = displayCart;
   const navigate = useNavigate();
 
   if (!isDrawerOpen) return null;
@@ -61,7 +60,7 @@ export function CartDrawer() {
                     <div className="flex justify-between items-start">
                       <h4 className="text-sm font-medium truncate">{item.menuItemName}</h4>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id || item.menuItemId, item.menuItemId)}
                         className="p-1 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -70,14 +69,14 @@ export function CartDrawer() {
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => updateItem(item.id, item.quantity - 1)}
+                          onClick={() => updateItem(item.id || item.menuItemId, item.quantity - 1, item.menuItemId)}
                           className="h-6 w-6 flex items-center justify-center rounded border hover:bg-muted"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
                         <span className="w-8 text-center text-sm">{item.quantity}</span>
                         <button
-                          onClick={() => updateItem(item.id, item.quantity + 1)}
+                          onClick={() => updateItem(item.id || item.menuItemId, item.quantity + 1, item.menuItemId)}
                           className="h-6 w-6 flex items-center justify-center rounded border hover:bg-muted"
                         >
                           <Plus className="h-3 w-3" />
@@ -96,7 +95,7 @@ export function CartDrawer() {
           <div className="border-t p-4 space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">配送费</span>
-              <span className="font-medium">{formatPrice(cart.restaurantId ? 0 : 0)}</span>
+              <span className="font-medium">{formatPrice(cart.deliveryFee ?? 0)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-semibold">合计</span>

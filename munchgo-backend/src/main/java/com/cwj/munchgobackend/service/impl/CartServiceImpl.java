@@ -216,25 +216,27 @@ public class CartServiceImpl implements CartService {
                 .userId(userId)
                 .restaurantId(null)
                 .restaurantName(null)
+                .deliveryFee(BigDecimal.ZERO)
                 .items(new ArrayList<>())
                 .totalAmount(BigDecimal.ZERO)
                 .build();
     }
 
     private CartResponse toCartResponse(Cart cart, List<CartItem> cartItems) {
-        String restaurantName = restaurantRepository.findById(cart.getRestaurantId())
-                .map(Restaurant::getName)
-                .orElse(null);
-        
+        Restaurant restaurant = restaurantRepository.findById(cart.getRestaurantId()).orElse(null);
+        String restaurantName = restaurant != null ? restaurant.getName() : null;
+        BigDecimal deliveryFee = restaurant != null ? restaurant.getDeliveryFee() : BigDecimal.ZERO;
+
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(this::toCartItemResponse)
                 .collect(Collectors.toList());
-        
+
         return CartResponse.builder()
                 .id(cart.getId())
                 .userId(cart.getUserId())
                 .restaurantId(cart.getRestaurantId())
                 .restaurantName(restaurantName)
+                .deliveryFee(deliveryFee)
                 .items(itemResponses)
                 .totalAmount(cart.getTotalAmount())
                 .build();

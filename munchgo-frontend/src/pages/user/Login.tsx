@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 
+function getRedirectPath(role: string | undefined): string {
+  if (role === 'MERCHANT') return '/merchant';
+  if (role === 'RIDER') return '/rider';
+  if (role === 'ADMIN') return '/admin';
+  return '/home';
+}
+
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +30,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login({ username, password });
-      navigate('/home');
+      const role = useAuthStore.getState().user?.role;
+      navigate(getRedirectPath(role));
     } catch (err: any) {
       error(err?.response?.data?.message || err?.message || '登录失败');
     } finally {
@@ -67,6 +75,15 @@ export default function LoginPage() {
               立即注册
             </Link>
           </p>
+          <div className="mt-4 pt-4 border-t">
+            <p className="text-xs text-center text-muted-foreground">
+              商家、骑手、管理员请使用专门账号登录
+            </p>
+            <div className="mt-2 flex justify-center gap-4 text-xs text-muted-foreground">
+              <span>商家后台 <Link to="/register" className="text-primary hover:underline">注册</Link></span>
+              <span>骑手后台 <Link to="/register" className="text-primary hover:underline">注册</Link></span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

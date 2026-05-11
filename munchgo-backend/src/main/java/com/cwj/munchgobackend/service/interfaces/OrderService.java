@@ -23,6 +23,12 @@ public interface OrderService {
 
     PageResponse<OrderResponse> getByRestaurantIds(List<Long> restaurantIds, Pageable pageable);
 
+    PageResponse<OrderResponse> getAll(Pageable pageable);
+
+    PageResponse<OrderResponse> getAvailableOrders(Pageable pageable);
+
+    Object getStats();
+
     OrderResponse updateStatus(Long id, OrderStatus newStatus, Long userId, String userRole);
 
     OrderResponse cancel(Long id, Long userId);

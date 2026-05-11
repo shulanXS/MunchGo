@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,32 @@ public class OrderController {
             @AuthenticationPrincipal UserPrincipal currentUser) {
         OrderResponse response = orderService.getById(id, currentUser.getId(), currentUser.getRole().name());
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> getStats() {
+        Object stats = orderService.getStats();
+        return ResponseEntity.ok(ApiResponse.success(stats));
+    }
+
+    @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('RIDER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getAvailableOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        PageResponse<OrderResponse> response = orderService.getAvailableOrders(pageable);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/recent")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MERCHANT')")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getRecent(
+            @RequestParam(defaultValue = "10") int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        PageResponse<OrderResponse> page = orderService.getAll(pageable);
+        return ResponseEntity.ok(ApiResponse.success(page.getContent()));
     }
 
     @GetMapping
@@ -80,7 +107,7 @@ public class OrderController {
                 }
             }
             case "RIDER" -> response = orderService.getByRiderId(currentUser.getId(), pageable);
-            case "ADMIN" -> response = orderService.getByUserId(currentUser.getId(), pageable);
+            case "ADMIN" -> response = orderService.getAll(pageable);
             default -> response = orderService.getByUserId(currentUser.getId(), pageable);
         }
         

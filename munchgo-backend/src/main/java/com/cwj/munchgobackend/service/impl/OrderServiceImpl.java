@@ -6,6 +6,7 @@ import com.cwj.munchgobackend.model.dto.request.CreateOrderRequest;
 import com.cwj.munchgobackend.model.dto.response.AddressResponse;
 import com.cwj.munchgobackend.model.dto.response.OrderItemResponse;
 import com.cwj.munchgobackend.model.dto.response.OrderResponse;
+import com.cwj.munchgobackend.model.dto.response.OrderStatsResponse;
 import com.cwj.munchgobackend.model.dto.response.PageResponse;
 import com.cwj.munchgobackend.model.entity.*;
 import com.cwj.munchgobackend.model.enums.OrderStatus;
@@ -164,41 +165,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public PageResponse<OrderResponse> getAll(Pageable pageable) {
+        log.info("Getting all orders for admin");
+        Page<Order> orderPage = orderRepository.findAll(pageable);
+        return toPageResponse(orderPage);
+    }
+
+    @Override
+    public Object getStats() {
+        log.info("Getting order statistics");
+        long total = orderRepository.count();
+        long pending = orderRepository.countByStatus(OrderStatus.PENDING);
+        long completed = orderRepository.countByStatus(OrderStatus.COMPLETED);
+        long cancelled = orderRepository.countByStatus(OrderStatus.CANCELLED);
+        return OrderStatsResponse.builder()
+                .total(total)
+                .pending(pending)
+                .completed(completed)
+                .cancelled(cancelled)
+                .build();
+    }
+
+    @Override
+    public PageResponse<OrderResponse> getAvailableOrders(Pageable pageable) {
+        log.info("Getting available orders for rider pool");
+        Page<Order> orderPage = orderRepository.findByStatus(OrderStatus.READY, pageable);
+        return toPageResponse(orderPage);
+    }
+
+    @Override
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatus newStatus, Long userId, String userRole) {
         log.info("Updating status for order: {} to {} by user: {}", id, newStatus, userId);
-        
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
-        
+
         OrderStatus currentStatus = order.getStatus();
-        
+
         boolean canTransition = switch (userRole) {
             case "MERCHANT" -> canMerchantTransition(currentStatus, newStatus);
             case "RIDER" -> canRiderTransition(currentStatus, newStatus);
             case "ADMIN" -> true;
             default -> false;
         };
-        
+
         if (!canTransition) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, 
+            throw new BusinessException(ErrorCode.BAD_REQUEST,
                     "Cannot transition from " + currentStatus + " to " + newStatus);
         }
-        
-        order.setStatus(newStatus);
-        
-        if (newStatus == OrderStatus.DELIVERING) {
+
+        if ("RIDER".equals(userRole) && newStatus == OrderStatus.DELIVERING) {
+            if (order.getRiderId() != null) {
+                throw new BusinessException(ErrorCode.ORDER_ALREADY_ASSIGNED,
+                        "This order has already been assigned to another rider");
+            }
             order.setRiderId(userId);
         }
-        
+
+        order.setStatus(newStatus);
+
         if (newStatus == OrderStatus.COMPLETED) {
             order.setPaidAt(LocalDateTime.now());
         }
-        
+
         order = orderRepository.save(order);
-        
+
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(id);
-        
+
         return toOrderResponse(order, orderItems);
     }
 
@@ -273,7 +307,9 @@ public class OrderServiceImpl implements OrderService {
                 Restaurant restaurant = restaurantRepository.findById(order.getRestaurantId()).orElse(null);
                 yield restaurant != null && restaurant.getUserId().equals(userId);
             }
-            case "RIDER" -> order.getRiderId() != null && order.getRiderId().equals(userId);
+            case "RIDER" ->
+                (order.getRiderId() != null && order.getRiderId().equals(userId))
+                    || order.getStatus() == OrderStatus.READY;
             default -> false;
         };
     }

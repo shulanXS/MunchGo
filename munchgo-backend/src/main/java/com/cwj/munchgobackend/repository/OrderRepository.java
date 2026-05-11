@@ -29,4 +29,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE o.restaurantId IN :restaurantIds")
     Page<Order> findByRestaurantIdIn(@Param("restaurantIds") List<Long> restaurantIds, Pageable pageable);
+
+    long countByStatus(OrderStatus status);
+
+    Page<Order> findByStatus(OrderStatus status, Pageable pageable);
+
+    Page<Order> findByStatusNotIn(List<OrderStatus> statuses, Pageable pageable);
 }

@@ -5,12 +5,14 @@ import {
   UtensilsCrossed,
   Utensils,
   ShoppingBag,
+  ShoppingCart,
   Users,
   BarChart3,
   ChevronLeft,
   Menu,
   LogOut,
   Bell,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -74,7 +76,7 @@ function Sidebar({ items, isCollapsed, onToggle }: SidebarProps) {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  type: 'merchant' | 'admin';
+  type: 'merchant' | 'admin' | 'rider';
 }
 
 export function DashboardLayout({ children, type }: DashboardLayoutProps) {
@@ -98,7 +100,14 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
     { label: '数据分析', icon: BarChart3, href: `/${type}/stats` },
   ];
 
-  const navItems = type === 'merchant' ? merchantNav : adminNav;
+  const riderNav: NavItem[] = [
+    { label: '工作台', icon: LayoutDashboard, href: `/${type}` },
+    { label: '接单池', icon: ShoppingBag, href: `/${type}/pool` },
+    { label: '我的配送', icon: ShoppingCart, href: `/${type}/orders` },
+    { label: '配送历史', icon: History, href: `/${type}/history` },
+  ];
+
+  const navItems = type === 'merchant' ? merchantNav : type === 'admin' ? adminNav : riderNav;
 
   const { data: unreadCount } = useQuery({
     queryKey: ['unreadCount'],
@@ -123,7 +132,9 @@ export function DashboardLayout({ children, type }: DashboardLayoutProps) {
       >
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-6">
           <div>
-            <h1 className="text-lg font-semibold capitalize">{type} Dashboard</h1>
+            <h1 className="text-lg font-semibold capitalize">
+              {type === 'merchant' ? '商家' : type === 'admin' ? '管理' : '骑手'} 概览
+            </h1>
             <p className="text-sm text-muted-foreground">Welcome, {user?.username}</p>
           </div>
           <div className="flex items-center gap-3">

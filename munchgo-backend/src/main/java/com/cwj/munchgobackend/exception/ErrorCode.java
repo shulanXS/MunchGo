@@ -34,6 +34,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(2201, HttpStatus.NOT_FOUND, "Order not found"),
     CART_EMPTY(2202, HttpStatus.BAD_REQUEST, "Cart is empty"),
     ORDER_CANNOT_BE_CANCELLED(2203, HttpStatus.BAD_REQUEST, "Order cannot be cancelled in current status"),
+    ORDER_ALREADY_ASSIGNED(2204, HttpStatus.CONFLICT, "Order has already been assigned to another rider"),
     
     // Validation errors (3000-3099)
     BAD_REQUEST(3001, HttpStatus.BAD_REQUEST, "Bad request"),

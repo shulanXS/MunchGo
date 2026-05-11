@@ -3,6 +3,7 @@ export interface Cart {
   userId: number;
   restaurantId: number;
   restaurantName?: string;
+  deliveryFee?: number;
   items: CartItem[];
   totalAmount: number;
 }

@@ -38,4 +38,9 @@ export const orderApi = {
     const response = await client.get('/orders/recent', { params: { limit } });
     return extractApiResponse(response);
   },
+
+  getAvailableOrders: async (params?: PageParams): Promise<PageResponse<Order>> => {
+    const response = await client.get('/orders/available', { params });
+    return extractApiResponse(response);
+  },
 };

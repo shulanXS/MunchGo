@@ -8,7 +8,7 @@ import { useToast } from './useToast';
 
 export function useCart() {
   const { isAuthenticated } = useAuth();
-  const { cart, setCart } = useCartStore();
+  const { cart, setCart, isDrawerOpen, openDrawer, closeDrawer } = useCartStore();
   const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast();
   const queryClient = useQueryClient();
 
@@ -75,24 +75,25 @@ export function useCart() {
   );
 
   const removeItem = useCallback(
-    (itemId: number) => {
-      removeItemMutation.mutate(itemId);
+    (itemId: number, menuItemId?: number) => {
+      const id = itemId || menuItemId;
+      if (id) removeItemMutation.mutate(id);
     },
     [removeItemMutation]
   );
 
   const clearCart = useCallback(() => {
-    const cartId = serverCart?.id || cart?.id;
-    if (cartId) {
-      clearCartMutation.mutate(cartId);
-    }
-  }, [serverCart, cart, clearCartMutation]);
+    clearCartMutation.mutate();
+  }, [clearCartMutation]);
 
   const displayCart = serverCart || cart;
 
   return {
     cart: displayCart,
     isLoading,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
     addItem,
     updateItem,
     removeItem,

@@ -25,8 +25,14 @@ export function useAuth() {
   );
 
   const registerFn = useCallback(
-    async (data: RegisterRequest) => {
-      await register(data);
+    async (data: RegisterRequest, callbacks?: { onSuccess?: () => void; onError?: (err: Error) => void }) => {
+      try {
+        await register(data);
+        callbacks?.onSuccess?.();
+      } catch (err) {
+        callbacks?.onError?.(err as Error);
+        throw err;
+      }
     },
     [register]
   );
@@ -48,5 +54,6 @@ export function useAuth() {
     isRegistering: isLoading,
     loginError: null,
     registerError: null,
+    getState: useAuthStore.getState,
   };
 }

@@ -65,7 +65,7 @@ export default function CartPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <h3 className="font-medium truncate">{name}</h3>
-                        <button onClick={() => removeItem(item.id)} className="p-1 text-muted-foreground hover:text-destructive">
+                        <button onClick={() => removeItem(item.id || item.menuItemId, item.menuItemId)} className="p-1 text-muted-foreground hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

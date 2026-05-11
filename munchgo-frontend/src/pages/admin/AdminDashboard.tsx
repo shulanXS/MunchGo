@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Utensils, ShoppingBag, Clock } from 'lucide-react';
+import { Users, Utensils, ShoppingBag, Clock, BarChart3 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
       </div>
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-4">快速操作</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/users')}>
             <CardContent className="p-4">
               <p className="font-medium">用户管理</p>
@@ -94,10 +94,16 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-muted-foreground">查看和删除餐厅</p>
             </CardContent>
           </Card>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/orders')}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/orders')}>
             <CardContent className="p-4">
               <p className="font-medium">订单管理</p>
               <p className="text-sm text-muted-foreground">查看和处理订单</p>
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/analytics')}>
+            <CardContent className="p-4">
+              <p className="font-medium">数据分析</p>
+              <p className="text-sm text-muted-foreground">订单统计概览</p>
             </CardContent>
           </Card>
         </div>
